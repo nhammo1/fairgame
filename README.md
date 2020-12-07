@@ -1,30 +1,28 @@
-# nvidia-bot
+# Fairgame
 
-[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/qDY2QBtAW6)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
-I built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
+We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
 out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699 GPUs are being listed
 for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers can't get a single one. Preorders for the PS5 are
-being resold for nearly $1000. My take on this is that if I release a bot that anyone can use, for free, then the number of items 
-that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
+being resold for nearly $1000. Our take on this is that if we release a bot that anyone can use, for free, then the number of items 
+that scalpers can buy goes down and normal consumers can buy items for MSRP. 
+
+**If everyone is botting, then no one is botting.**
 
 ## Got a question?
 
-See the [FAQs](#frequently-asked-questions) first.
+Read through this document and the cheat sheet linked in the next sections. See the [FAQs](#frequently-asked-questions) if that does not answer your questions.
 
 ## Installation
 
-For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
+Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/).
 
-This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. 
+This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/qDY2QBtAW6) if you have ideas, need help or just want to tell us about how you got your new toys. 
 
-To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/nvidia-bot/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieving updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
-
-[TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
-
-[![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
+To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieving updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
 
 !!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 ```
@@ -44,14 +42,13 @@ Options:
 
 Commands:
   amazon
-  nvidia
+  bestbuy
 ```
 
 ## Current Functionality
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
 |:---:|:---:|:---:|:---:|
-| ~~nvidia.com~~ | |~~`✔`~~| |
 | amazon.com |`✔`| | |
 | bestbuy.com | |`✔`| |
 
@@ -60,27 +57,71 @@ Commands:
 
 ### Amazon 
 
-***Warning***: This will buy every ASIN that is in stock the first time anything is in stock. So there is a possibility you can end up with multiple items.
-Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We are working on a solution for this and price limits soon.
-
 **Amazon flags**
 ```
 --no-image : prevents images from loading on amazon webdriver
 --test : This will not finish the checkout
+--delay : modify default delay between page refreshes (3 seconds), use --delay=x, where is is time in seconds (accepts decimals)
+--checkshipping : Bot will consider shipping + sales price in reserve check. Without this flag, only free shipping items will be considered
+--detailed : Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!
+--used : Show used items in search listings
+--random-delay : Set delay to a random interval
+--single-shot : Quit after 1 successful purchase
+--no-screenshots : Do not take screenshots
 ```
 
-Make a copy of `amazon_config.template_json` to `amazon_config.json`:
+Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 ```json
 {
-  "username": "",
-  "password": "",
-  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "www.amazon.com",
-  "reserve": 1000
+  "asin_groups": 2,
+  "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_min_1": 800,
+  "reserve_max_1": 1000,
+  "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_min_2": 700,
+  "reserve_max_2": 750,
+  "amazon_website": "smile.amazon.com"
 }
 ```
-* `reserve` is the most amount you want to spend, ensures you don't buy scalper stuff
+* `asin_groups` indicates the number of ASIN groups you want to use.
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
+    * If the purchase is successful, the bot will not buy anything else from list "x".
+    * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
+* `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar item a 1 dollar, it's likely fake.
+* `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
+* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
+
+Previously your username and password were entered into the config file, this is no longer the case. On first launch the bot will prompt
+you for your credentials. You will then be asked for a password to encrypt them. Once done, your encrypted credentials will be stored in
+`amazon_credentials.json`. If you ever forget your encryption password, just delete this file and the next launch of the bot will recreate
+it. An example of this will look like the following:
+
+```
+python app.py amazon
+INFO Initializing Apprise handler
+INFO Initializing other notification handlers
+INFO Enabled Handlers: ['Audio']
+INFO No credential file found, let's make one
+Amazon login ID: <your email address>
+Amazon Password: <your amazon password>
+INFO Create a password for the credential file
+Credential file password: <a password used to encrypt your amazon credentials>
+Verify credential file password: <the same password that was entered above>
+INFO Credentials safely stored.
+```
+
+Starting the bot when you have created an encrypted file:
+
+```
+python app.py amazon --test
+INFO Initializing Apprise handler
+INFO Initializing other notification handlers
+INFO Enabled Handlers: ['Audio']
+Reading credentials from: amazon_credentials.json
+Credential file password: <enter the previously created password>
+```
 Example usage:
 
 ```
@@ -105,33 +146,6 @@ INFO: "2020-09-25 14:41:04,617 - This is a test, so we don't need to wait for th
 INFO: "2020-09-25 14:41:04,617 - Order Placed.
 ```
 
-### Nvidia 
-**NOTE**:
-**As of [October 19, 2020](https://www.nvidia.com/en-us/geforce/forums/geforce-graphics-cards/5/402196/updated-1019-nvidia-store-update-geforce-rtx-3080-/), NVIDIA has indicated that they are no longer selling the Founder's Edition on the NVIDIA store in the US. It is possible they may continue selling them in Europe at a future date, however the bot may not be functional if they modify the store interface before they add new cards to the website. At this point, the NVIDIA store portion of the bot is deprecated.**
-
-Will check stock and open an add to cart link in your browser and send notifications.
-
-**Nvidia flags**
-```
---test : runs a test of the checkout process, without actually making the purchase
---interval: How many seconds between each stock check (default: 5)
-```
-
-Example usage:
-```python
-python app.py nvidia
-What GPU are you after?: 3080
-What locale shall we use? [en_us]:
-...
-INFO: "2020-09-23 21:43:56,152 - We have 1 product IDs for NVIDIA GEFORCE RTX 3080
-INFO: "2020-09-23 21:43:56,153 - Product IDs: ['5438481700']
-INFO: "2020-09-23 21:43:56,153 - Checking stock for 5438481700 at 5 second intervals.
-```
-
-Quick run:
-```python
-python app.py nvidia --gpu 3080 --locale en_us
-```
 
 ## Best Buy
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
@@ -164,6 +178,9 @@ Apprise Example blobs:
   },
   {
   "url": "slack://{OAuthToken}/#{channel}"
+  },
+  {
+  "url": "{COPY AND PASTE DISCORD WEBHOOK HERE}"
   }
 ]
 ```
@@ -186,7 +203,7 @@ Once you have setup your `apprise_config.json ` you can test it by running `pyth
 
 ## Troubleshooting
 
-I suggest joining the #tech-support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
+I suggest joining the #tech-support channel in [Discord](https://discord.gg/qDY2QBtAW6) for personal assistance if these common fixes don't help.
 
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
@@ -196,19 +213,20 @@ The easy fix for this is to add an option where selenium is used (`selenium_util
 chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
 ```
 
-**Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 85```**
+**Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 87```**
 
-You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 85. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
+You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 87. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
 
 ## Raspberry-Pi-Setup
+Maybe this works?
 
 1. Prereqs and Setup
 ```shell
 sudo apt update
 sudo apt upgrade
 sudo apt install chromium-chromedriver
-git clone https://github.com/Hari-Nagarajan/nvidia-bot
-cd nvidia-bot/
+git clone https://github.com/Hari-Nagarajan/fairgame
+cd fairgame/
 pip3 install pipenv
 export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
 pipenv shell 
@@ -218,7 +236,7 @@ pipenv install
 
 3. Open the following file in a text editor: 
 ```
-/home/<YOURUSERNAME>/.local/share/virtualenvs/nvidia-bot-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+/home/<YOURUSERNAME>/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
 ```
 4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
 
@@ -233,10 +251,9 @@ python app.py
 ## Frequently Asked Questions
 
 ### 1. Can I run multiple instances of the bot? 
-Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
+Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
 
-### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
-* For the Nvidia store, no. The Nvidia bot just notifys you when the desired card is in stock, and tries to add it to your cart. The rest of the checkout process is up to you.
+### 2. Does Fairgame automatically bypass CAPTCHA's on the store sites?
 * For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
 ## Attribution
